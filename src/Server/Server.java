@@ -7,7 +7,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * Created by mnt_x on 22/02/2017.
+ * @author Laurie Dugdale
  */
 public class Server implements Runnable {
 
@@ -26,34 +26,29 @@ public class Server implements Runnable {
 
     }
 
-    public void start(){
-
-        try {
-            ServerSocket serverSocket = new ServerSocket(port);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-    }
-
-
     public void run(){
+
         synchronized(this){
             this.runningThread = Thread.currentThread();
         }
         openServerSocket();
         while(! isStopped()){
+
             Socket clientSocket = null;
             try {
+
                 clientSocket = this.serverSocket.accept();
             } catch (IOException e) {
+
                 if(isStopped()) {
+
                     System.out.println("Server Stopped.") ;
                     break;
                 }
+
                 throw new RuntimeException( "Error accepting client connection", e);
             }
-            this.threadPool.execute( new Packets());
+            this.threadPool.execute( new Packets(clientSocket));
         }
         this.threadPool.shutdown();
         System.out.println("Server Stopped.") ;
@@ -61,14 +56,18 @@ public class Server implements Runnable {
 
 
     private synchronized boolean isStopped() {
+
         return this.isStopped;
     }
 
     public synchronized void stop(){
+
         this.isStopped = true;
         try {
+
             this.serverSocket.close();
         } catch (IOException e) {
+
             throw new RuntimeException("Error closing server", e);
         }
     }
@@ -78,7 +77,7 @@ public class Server implements Runnable {
         try {
             this.serverSocket = new ServerSocket(this.port);
         } catch (IOException e) {
-            throw new RuntimeException("Cannot open port 8080", e);
+            throw new RuntimeException("Cannot open port", e);
         }
     }
 }

@@ -1,8 +1,6 @@
 package Server;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
 
 /**
@@ -11,25 +9,24 @@ import java.net.Socket;
 public class Packets implements Runnable {
 
     protected Socket clientSocket = null;
-    protected String serverText   = null;
 
-    public Packets(Socket clientSocket, String serverText) {
+    public Packets(Socket clientSocket) {
         this.clientSocket = clientSocket;
-        this.serverText   = serverText;
     }
 
     public void run() {
         try {
-            InputStream input  = clientSocket.getInputStream();
-            OutputStream output = clientSocket.getOutputStream();
-            long time = System.currentTimeMillis();
-            output.write(("HTTP/1.1 200 OK\n\nWorkerRunnable: " +
-                    this.serverText + " - " +
-                    time +
-                    "").getBytes());
+//            InputStream input  = clientSocket.getInputStream();
+//            OutputStream output = clientSocket.getOutputStream();
+
+            ObjectInputStream output =  new ObjectInputStream(clientSocket.getInputStream());
+
+            ObjectOutputStream input = new ObjectOutputStream(clientSocket.getOutputStream());
+
             output.close();
             input.close();
-            System.out.println("Request processed: " + time);
+
+
         } catch (IOException e) {
             //report exception somewhere.
             e.printStackTrace();
