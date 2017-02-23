@@ -1,6 +1,10 @@
 package Server;
 
+import Server.Communications.Login;
+import Server.Communications.Setup;
+
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
@@ -14,14 +18,20 @@ public class TestClient {
         long start = System.currentTimeMillis();
 
         Socket s = new Socket("localhost", 4444);
+        Login l = new Login("username", "pass");
         ObjectOutputStream toServer = new ObjectOutputStream(s.getOutputStream());
+        toServer.writeObject(l);
 
-        for (int id=0; id < HowMany.times; id++) {
-            toServer.writeObject(new Person("John", id));
+        long end;
+        try (ObjectInputStream fromServer = new ObjectInputStream(s.getInputStream())) {
+
+            Setup setup = (Setup)fromServer.readObject();
+
+
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
         }
 
-        long end = System.currentTimeMillis();
-        System.out.println("Total time " + (end-start)/1000 + "s");
 
     }
 }

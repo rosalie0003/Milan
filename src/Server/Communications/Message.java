@@ -1,13 +1,11 @@
 package Server.Communications;
 
-import communications.*;
 
 public class Message extends Memo {
 
     private int userID;
     private String meta;
     private String message;
-    private String test;
 
     public Message(int chatID, int appTarget, int userID, String meta, String message) {
 

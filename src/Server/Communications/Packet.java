@@ -1,7 +1,4 @@
-package Communications;
-
-import Server.Communications.Memo;
-import Server.Communications.Message;
+package Server.Communications;
 
 public class Packet {
 

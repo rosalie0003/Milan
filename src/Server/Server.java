@@ -1,5 +1,7 @@
 package Server;
 
+import Server.Database.*;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -12,6 +14,7 @@ import java.util.concurrent.Executors;
 public class Server implements Runnable {
 
     private int port;
+    Database Conn = new MessengerDatabase();
     private ServerGUI sg;
     protected ServerSocket serverSocket = null;
     protected boolean isStopped = false;
@@ -19,6 +22,7 @@ public class Server implements Runnable {
     protected ExecutorService threadPool = Executors.newFixedThreadPool(10);
 
     public Server(int port) {
+
         this.port = port;
     }
 
@@ -36,6 +40,7 @@ public class Server implements Runnable {
             this.runningThread = Thread.currentThread();
         }
         openServerSocket();
+
         while(! isStopped()){
 
             Socket clientSocket = null;

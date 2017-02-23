@@ -1,7 +1,16 @@
 package Server.Communications;
+import java.util.List;
 
-/**
- * Created by mnt_x on 22/02/2017.
- */
-public class History {
+public class History extends Memo {
+
+    private List<String> history;
+
+    public History(int chatID, int appTarget, List<String> history) {
+        super(chatID, appTarget);
+        this.history = history;
+    }
+
+    public List<String> getHistory() {
+        return history;
+    }
 }

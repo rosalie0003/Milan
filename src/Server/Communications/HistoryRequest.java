@@ -1,7 +1,10 @@
 package Server.Communications;
 
-/**
- * Created by mnt_x on 22/02/2017.
- */
-public class HistoryRequest {
+
+public class HistoryRequest extends Memo {
+
+    public HistoryRequest(int chatID, int appTarget) {
+        super(chatID, appTarget);
+    }
+
 }

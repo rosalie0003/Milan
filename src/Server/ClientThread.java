@@ -1,5 +1,9 @@
 package Server;
 
+import Server.Communications.*;
+import Server.Database.Database;
+import Server.Database.MessengerDatabase;
+
 import java.io.*;
 import java.net.Socket;
 
@@ -17,7 +21,7 @@ public class ClientThread implements Runnable {
      * @param clientSocket
      */
     public ClientThread(Socket clientSocket) {
-        System.out.println("hello");
+
         try {
 
             this.clientSocket = clientSocket;
@@ -34,17 +38,12 @@ public class ClientThread implements Runnable {
      */
     public void run() {
 
+        Database db = new MessengerDatabase();
+
         try {
 
-            int count=0;
-            System.out.println("here");
-            for(int i = 0; i < HowMany.times; i++) {
-                Person p = (Person) input.readObject();
-
-                if (count++ % 1000 == 0) {
-                    System.out.println(p);
-                }
-            }
+            CommunicationHandler ch = new CommunicationHandler(input.readObject(), output, db);
+            ch.parseCommunication();
 
             output.close();
             input.close();
@@ -52,7 +51,10 @@ public class ClientThread implements Runnable {
 
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
+
             e.printStackTrace();
         }
+
+        db.close();
     }
 }
