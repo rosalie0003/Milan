@@ -18,6 +18,10 @@ public class Server implements Runnable {
     protected Thread runningThread= null;
     protected ExecutorService threadPool = Executors.newFixedThreadPool(10);
 
+    public Server(int port) {
+        this.port = port;
+    }
+
     public Server(int port, ServerGUI sg) {
 
         this.port = port;
@@ -48,7 +52,7 @@ public class Server implements Runnable {
 
                 throw new RuntimeException( "Error accepting client connection", e);
             }
-            this.threadPool.execute( new Packets(clientSocket));
+            this.threadPool.execute( new ClientThread(clientSocket));
         }
         this.threadPool.shutdown();
         System.out.println("Server Stopped.") ;
@@ -79,5 +83,10 @@ public class Server implements Runnable {
         } catch (IOException e) {
             throw new RuntimeException("Cannot open port", e);
         }
+    }
+
+    public static void main(String[] args) {
+        Server test = new Server(4444);
+        test.run();
     }
 }
