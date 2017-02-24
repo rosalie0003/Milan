@@ -25,6 +25,7 @@ public class MessengerDatabase implements Database {
 
     @Override
     public List<Integer> getChats(String username) {
+
         return null;
     }
 
@@ -79,5 +80,10 @@ public class MessengerDatabase implements Database {
     @Override
     public boolean userActive(String username) {
         return false;
+    }
+
+    @Override
+    public void setUserActive(String username) {
+
     }
 }

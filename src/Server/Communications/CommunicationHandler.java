@@ -7,19 +7,31 @@ import java.io.ObjectOutputStream;
 import java.sql.Connection;
 
 /**
- * Created by mnt_x on 23/02/2017.
+ * Class handles incoming communication from client
+ * @author Laurie Dugdale
  */
 public class CommunicationHandler {
 
-    Object communication;
-    ObjectOutputStream output;
-    Database db;
+    private Object communication;
+    private ObjectOutputStream output;
+    private Database db;
+    private boolean messageReceived;
 
     public CommunicationHandler(Object communication, ObjectOutputStream output, Database db){
 
         this.communication = communication;
         this.output = output;
         this.db = db;
+    }
+
+    public boolean isMessageReceived(){
+
+        return messageReceived;
+    }
+
+    public void setMessageReceived( boolean messageReceived ){
+
+        this.messageReceived = messageReceived;
     }
 
     public void parseCommunication(){
@@ -44,6 +56,7 @@ public class CommunicationHandler {
         }
     }
 
+
     public void loginHandler(Login login) throws IOException {
 
         String username = login.getUsername();
@@ -56,7 +69,8 @@ public class CommunicationHandler {
 //        }
     }
 
-    public void send() {
+    // Send a message to a client
+    public void sendMessage() {
 
     }
 }

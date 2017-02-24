@@ -14,7 +14,6 @@ import java.util.concurrent.Executors;
 public class Server implements Runnable {
 
     private int port;
-    Database Conn = new MessengerDatabase();
     private ServerGUI sg;
     protected ServerSocket serverSocket = null;
     protected boolean isStopped = false;
@@ -34,6 +33,10 @@ public class Server implements Runnable {
 
     }
 
+
+    /**
+     * Server pool creating new Client thread
+     */
     public void run(){
 
         synchronized(this){
@@ -57,6 +60,7 @@ public class Server implements Runnable {
 
                 throw new RuntimeException( "Error accepting client connection", e);
             }
+            // Create new clientThread on connection
             this.threadPool.execute( new ClientThread(clientSocket));
         }
         this.threadPool.shutdown();

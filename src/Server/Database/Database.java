@@ -33,4 +33,6 @@ public interface Database {
 
     // potential method could be used for checking if a user is online.
     boolean userActive(String username);
+
+    void setUserActive(String username);
 }

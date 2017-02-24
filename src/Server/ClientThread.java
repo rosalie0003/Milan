@@ -17,7 +17,7 @@ public class ClientThread implements Runnable {
     private ObjectOutputStream output;
 
     /**
-     *
+     * Constructor setup input output stream and assign socket to field variable
      * @param clientSocket
      */
     public ClientThread(Socket clientSocket) {
@@ -25,7 +25,7 @@ public class ClientThread implements Runnable {
         try {
 
             this.clientSocket = clientSocket;
-            input =  new ObjectInputStream(clientSocket.getInputStream());
+            input = new ObjectInputStream(clientSocket.getInputStream());
             output = new ObjectOutputStream(clientSocket.getOutputStream());
 
         } catch (IOException e) {
@@ -36,14 +36,28 @@ public class ClientThread implements Runnable {
     /**
      *
      */
-    public void run() {
+    public synchronized void run() {
+        // each thread needs a queue
 
+        // create database connection ---- consider connection pool when I have more time
         Database db = new MessengerDatabase();
 
         try {
 
+            // pass intput and output and db connection to connectionHandler to parse incoming objects
             CommunicationHandler ch = new CommunicationHandler(input.readObject(), output, db);
-            ch.parseCommunication();
+            synchronized (ch){
+                ch.parseCommunication();
+                // if message is received notify other threads to query database for new message to send to client
+                if(ch.isMessageReceived()){
+
+                    // set false after doing stuff
+                    ch.setMessageReceived(false);
+                }
+
+            }
+
+            System.out.println("message received");
 
             output.close();
             input.close();
