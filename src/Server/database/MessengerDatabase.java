@@ -1,6 +1,6 @@
 package Server.database;
 
-import Server.Database.Database;
+import Server.database.Database;
 import Server.Server;
 
 import java.sql.Connection;

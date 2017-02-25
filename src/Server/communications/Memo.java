@@ -1,6 +1,8 @@
 package Server.communications;
 
-public abstract class Memo {
+import java.io.Serializable;
+
+public abstract class Memo implements Serializable {
 	
 	public Memo() {
 		// Anything here?

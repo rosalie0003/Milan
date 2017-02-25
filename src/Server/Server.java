@@ -1,15 +1,12 @@
 package Server;
 
 import Server.database.*;
-import communications.Packet;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
-import java.util.Queue;
 
 /**
  * @author Laurie Dugdale
@@ -27,6 +24,10 @@ public class Server implements Runnable {
     public Server(int port) {
 
         this.port = port;
+
+        db = new MessengerDatabase();
+
+        threads = new HashMap<>();
     }
 
     public Server(int port, ServerGUI sg) {
@@ -55,10 +56,12 @@ public class Server implements Runnable {
 
             try {
 
-                Socket clientSocket = this.serverSocket.accept();
 
-                threads.put("123", new ClientThread(this, clientSocket));
-                threads.get("123").run();
+                Socket clientSocket = this.serverSocket.accept();
+                ClientThread temp = new ClientThread(this, clientSocket);
+                clientSocket.getOutputStream();
+                threads.put(temp.getUsername(),temp);
+                threads.get(temp.getUsername()).start();
             } catch (IOException e) {
 
                 if(isStopped()) {
@@ -80,11 +83,15 @@ public class Server implements Runnable {
         return this.isStopped;
     }
 
+    /**
+     * Stop server - used by GUI
+     */
     public synchronized void stop(){
 
         this.isStopped = true;
         try {
 
+            terminateThreads();
             this.serverSocket.close();
         } catch (IOException e) {
 
@@ -113,3 +120,4 @@ public class Server implements Runnable {
         test.run();
     }
 }
+

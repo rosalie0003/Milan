@@ -6,7 +6,6 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 import Server.communications.*;
-import communications.*;
 
 /**
  * Created by mnt_x on 22/02/2017.
@@ -20,9 +19,11 @@ public class ClientThread extends Thread implements PacketHandler {
     private ObjectOutputStream output;
     Queue<Packet> tempPacketsToProcess = new LinkedList<Packet>();
     private int userID;
+    private String username;
 
     /**
-     * Constructor setup input output stream and assign socket to field variable
+     * Constructor setup input output stream and assign socket to field variable.
+     *
      * @param clientSocket
      */
     public ClientThread(Server server, Socket clientSocket) {
@@ -35,16 +36,39 @@ public class ClientThread extends Thread implements PacketHandler {
             input = new ObjectInputStream(clientSocket.getInputStream());
             output = new ObjectOutputStream(clientSocket.getOutputStream());
         } catch (IOException e) {
+
             e.printStackTrace();
         }
     }
 
+    public String getUsername() {
 
+        return this.username;
+    }
+
+    public void setUsername(String username){
+        this.username = username;
+    }
+
+    public int getUserID() {
+
+        return this.userID;
+    }
+
+
+    /**
+     *
+     * @param packet
+     */
     public synchronized void addPacketToProcess(Packet packet) {
 
         tempPacketsToProcess.add(packet);
     }
 
+    /**
+     *
+     * @return
+     */
     public synchronized Packet dequeuePacketToProcess() {
 
         return tempPacketsToProcess.poll();
@@ -55,6 +79,32 @@ public class ClientThread extends Thread implements PacketHandler {
      *
      */
     public synchronized void run() {
+
+        // Connection to server is initialised in run()
+        // Then we enter continuous loop here and wait for i/o from server or program
+        //
+        // Do we also have Queues of incoming and outgoing messages to pack/unpack?
+        try {
+            addPacketToProcess((Packet)input.readObject());
+
+
+        }catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+
+        /////////////////
+        //////////
+        ////////// This is the important bit.
+        ////////// The PacketReader.readPacket(item, this); call, where 'this' is
+        ////////// a controller which implements PacketHandler is the thing which
+        ////////// allows the current class to process any incoming packet.
+        ////////// Note that a packet can be passed to PacketReader either as a
+        ////////// Packet (throge = new Message(new int[] {ugh readPacket) or as an Object (through ReadRawPacket).
+        //////////
+        /////////////////
 
         try {
 
@@ -126,11 +176,16 @@ public class ClientThread extends Thread implements PacketHandler {
 
     @Override
     public boolean handleSetup(Setup setup) {
+        System.out.println("setup");
+
+        // should not be received by server
         return false;
     }
 
     @Override
     public boolean handleLogin(Login login) {
+        setUsername(login.getUsername());
+        System.out.println(getUsername());
         return false;
     }
 }

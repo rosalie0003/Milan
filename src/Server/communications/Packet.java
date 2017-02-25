@@ -1,6 +1,8 @@
 package Server.communications;
 
-public class Packet {
+import java.io.Serializable;
+
+public class Packet implements Serializable{
 	
 	private int type;
 	private Memo memo;
@@ -49,10 +51,12 @@ public class Packet {
 	}
 
 	public int getType() {
+
 		return type;
 	}
 
 	public Memo getMemo() {
+
 		return memo;
 	}
 	

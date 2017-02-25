@@ -1,7 +1,6 @@
 package Server;
 
-import Server.Communications.Login;
-import Server.Communications.Setup;
+import Server.communications.*;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -20,7 +19,7 @@ public class TestClient {
         Socket s = new Socket("localhost", 4444);
         Login l = new Login("username", "pass");
         ObjectOutputStream toServer = new ObjectOutputStream(s.getOutputStream());
-        toServer.writeObject(l);
+        toServer.writeObject(new Packet(l));
 
         long end;
         try (ObjectInputStream fromServer = new ObjectInputStream(s.getInputStream())) {
