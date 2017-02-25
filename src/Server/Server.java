@@ -5,6 +5,10 @@ import Server.Database.*;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -15,10 +19,11 @@ public class Server implements Runnable {
 
     private int port;
     private ServerGUI sg;
-    protected ServerSocket serverSocket = null;
-    protected boolean isStopped = false;
-    protected Thread runningThread= null;
-    protected ExecutorService threadPool = Executors.newFixedThreadPool(10);
+    private ServerSocket serverSocket = null;
+    private boolean isStopped = false;
+    private Thread runningThread= null;
+    private Map<String, ClientThread> threads;
+    Database db;
 
     public Server(int port) {
 
@@ -31,6 +36,9 @@ public class Server implements Runnable {
 
         this.sg = sg;
 
+        db = new MessengerDatabase();
+
+        threads = new HashMap<>();
     }
 
 
@@ -50,6 +58,9 @@ public class Server implements Runnable {
             try {
 
                 clientSocket = this.serverSocket.accept();
+
+                threads.put("123", new ClientThread(this, clientSocket));
+                threads.get("123").run();
             } catch (IOException e) {
 
                 if(isStopped()) {
@@ -61,9 +72,7 @@ public class Server implements Runnable {
                 throw new RuntimeException( "Error accepting client connection", e);
             }
             // Create new clientThread on connection
-            this.threadPool.execute( new ClientThread(clientSocket));
         }
-        this.threadPool.shutdown();
         System.out.println("Server Stopped.") ;
     }
 
@@ -83,6 +92,13 @@ public class Server implements Runnable {
 
             throw new RuntimeException("Error closing server", e);
         }
+    }
+
+    /**
+     * terminate threads in the map here
+     */
+    public void terminateThreads(){
+
     }
 
     private void openServerSocket() {

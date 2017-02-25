@@ -17,7 +17,7 @@ public class CommunicationHandler {
     private Database db;
     private boolean messageReceived;
 
-    public CommunicationHandler(Object communication, ObjectOutputStream output, Database db){
+    public CommunicationHandler(Object communication, ObjectOutputStream output){
 
         this.communication = communication;
         this.output = output;
@@ -62,6 +62,7 @@ public class CommunicationHandler {
         String username = login.getUsername();
         String password = login.getPassword();
         output.writeObject(new Setup(db.getChats(username), db.getActiveChat(username)));
+        System.out.println("message received here");
 
 //        if(db.checkCredentials(username, password)){
 //
