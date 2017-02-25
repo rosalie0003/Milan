@@ -24,6 +24,11 @@ public class MessengerDatabase implements Database {
     }
 
     @Override
+    public int getUserID(String username) {
+        return 0;
+    }
+
+    @Override
     public List<Integer> getChats(String username) {
 
         return null;
@@ -44,7 +49,12 @@ public class MessengerDatabase implements Database {
     }
 
     @Override
-    public List<String> getHistory(int chatID, String appTarget) {
+    public int getActiveChatID(String username) {
+        return 0;
+    }
+
+    @Override
+    public List<String> getHistory(int chatID, int appTarget) {
 
 //        Leaving this code here to convert resultset to list as it makes more sense to convert in the getter
 //        ResultSet rs = new ResultSet();
@@ -58,7 +68,36 @@ public class MessengerDatabase implements Database {
     }
 
     @Override
-    public void setMessage(int chatID, String appTarget, String message, String meta) {
+    public List<String> getChatUsernames(int chatID) {
+
+//        Leaving this code here to convert resultset to list as it makes more sense to convert in the getter
+//        ResultSet rs = new ResultSet();
+//
+//        List<String> result = new ArrayList<>();
+//        while (rs.next()) {
+//            fullnames.add());
+//        }
+//        return result;
+        return null;
+    }
+
+    @Override
+    public int [] getChatUserIDs(int chatID) {
+
+//        Leaving this code here to convert resultset to list as it makes more sense to convert in the getter
+//        ResultSet rs = new ResultSet();
+//
+//        List<String> result = new ArrayList<>();
+//        while (rs.next()) {
+//            fullnames.add());
+//        }
+//        return result;
+        return null;
+    }
+
+
+    @Override
+    public void setMessage(int chatID, int appTarget, String message, String meta) {
 
     }
 
@@ -78,7 +117,7 @@ public class MessengerDatabase implements Database {
     }
 
     @Override
-    public boolean userActive(String username) {
+    public boolean userActive(int ID) {
         return false;
     }
 

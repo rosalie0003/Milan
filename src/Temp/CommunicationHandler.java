@@ -62,7 +62,6 @@ public class CommunicationHandler {
         String username = login.getUsername();
         String password = login.getPassword();
         output.writeObject(new Setup(db.getChats(username), db.getActiveChat(username)));
-        System.out.println("message received here");
 
 //        if(db.checkCredentials(username, password)){
 //

@@ -19,7 +19,7 @@ public class ClientThread extends Thread implements PacketHandler {
     private ObjectOutputStream output;
     Queue<Packet> tempPacketsToProcess = new LinkedList<Packet>();
     private int userID;
-    private String username;
+    public String username;
 
     /**
      * Constructor setup input output stream and assign socket to field variable.
@@ -35,7 +35,16 @@ public class ClientThread extends Thread implements PacketHandler {
             this.clientSocket = clientSocket;
             input = new ObjectInputStream(clientSocket.getInputStream());
             output = new ObjectOutputStream(clientSocket.getOutputStream());
+
+            // login here
+            Packet packet = (Packet)input.readObject();
+            handleLogin((Login)packet.getMemo());
+
+
         } catch (IOException e) {
+
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
 
             e.printStackTrace();
         }
@@ -48,6 +57,10 @@ public class ClientThread extends Thread implements PacketHandler {
 
     public void setUsername(String username){
         this.username = username;
+    }
+
+    public void setUserID(int userID){
+        this.userID = userID;
     }
 
     public int getUserID() {
@@ -80,10 +93,7 @@ public class ClientThread extends Thread implements PacketHandler {
      */
     public synchronized void run() {
 
-        // Connection to server is initialised in run()
-        // Then we enter continuous loop here and wait for i/o from server or program
-        //
-        // Do we also have Queues of incoming and outgoing messages to pack/unpack?
+
         try {
             addPacketToProcess((Packet)input.readObject());
 
@@ -93,18 +103,6 @@ public class ClientThread extends Thread implements PacketHandler {
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
-
-
-        /////////////////
-        //////////
-        ////////// This is the important bit.
-        ////////// The PacketReader.readPacket(item, this); call, where 'this' is
-        ////////// a controller which implements PacketHandler is the thing which
-        ////////// allows the current class to process any incoming packet.
-        ////////// Note that a packet can be passed to PacketReader either as a
-        ////////// Packet (throge = new Message(new int[] {ugh readPacket) or as an Object (through ReadRawPacket).
-        //////////
-        /////////////////
 
         try {
 
@@ -123,6 +121,11 @@ public class ClientThread extends Thread implements PacketHandler {
         }
     }
 
+    public void messageFromClient(Message message) throws IOException {
+
+        output.writeObject(message);
+    }
+
 
 
     /*
@@ -131,17 +134,25 @@ public class ClientThread extends Thread implements PacketHandler {
 
     @Override
     public boolean handleMessage(Message message) {
-        return false;
+
+        server.recievedMessage(message);
+
+        return true;
     }
 
     @Override
     public boolean handleHistory(History history) {
+
+        // should not be received by server
         return false;
     }
 
     @Override
     public boolean handleHistoryRequest(HistoryRequest historyRequest) {
-        return false;
+
+
+        server.history(historyRequest.getChatID(), historyRequest.getAppTarget());
+        return true;
     }
 
     @Override
@@ -166,6 +177,7 @@ public class ClientThread extends Thread implements PacketHandler {
 
     @Override
     public boolean handleFriendRequest(FriendRequest friendRequest) {
+
         return false;
     }
 
@@ -176,7 +188,6 @@ public class ClientThread extends Thread implements PacketHandler {
 
     @Override
     public boolean handleSetup(Setup setup) {
-        System.out.println("setup");
 
         // should not be received by server
         return false;
@@ -184,8 +195,25 @@ public class ClientThread extends Thread implements PacketHandler {
 
     @Override
     public boolean handleLogin(Login login) {
-        setUsername(login.getUsername());
-        System.out.println(getUsername());
+
+        String username = login.getUsername();
+        String password = login.getPassword();
+
+        try {
+            setUserID(server.getUserID(username));
+            setUsername(username);
+
+            output.writeObject(new Packet(server.setup(username)));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+//        if(db.checkCredentials(username, password)){
+//
+//            output.writeObject(new Setup(db.getChats(username), db.getActiveChat(username)));
+//            return true;
+//        } else {
+//            return false;
+//            }
         return false;
     }
 }

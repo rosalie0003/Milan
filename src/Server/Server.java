@@ -1,12 +1,15 @@
 package Server;
 
+import Server.communications.*;
 import Server.database.*;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Queue;
 
 /**
  * @author Laurie Dugdale
@@ -19,7 +22,8 @@ public class Server implements Runnable {
     private boolean isStopped = false;
     private Thread runningThread= null;
     private Map<String, ClientThread> threads;
-    Database db;
+    private Queue<Message> messageQueue;
+    private Database db;
 
     public Server(int port) {
 
@@ -28,6 +32,8 @@ public class Server implements Runnable {
         db = new MessengerDatabase();
 
         threads = new HashMap<>();
+
+        Queue<Message> messageQueue = new LinkedList<>();
     }
 
     public Server(int port, ServerGUI sg) {
@@ -39,6 +45,8 @@ public class Server implements Runnable {
         db = new MessengerDatabase();
 
         threads = new HashMap<>();
+
+        Queue<Message> messageQueue = new LinkedList<>();
     }
 
 
@@ -52,16 +60,24 @@ public class Server implements Runnable {
         }
         openServerSocket();
 
+        // Create Thread to handle all messages.
+        Thread MessagesThread = new Thread( new MessageThread(this));
+
         while(! isStopped()){
 
             try {
 
-
+                // Accept socket connection
                 Socket clientSocket = this.serverSocket.accept();
+
+                // Create the client thread
                 ClientThread temp = new ClientThread(this, clientSocket);
-                clientSocket.getOutputStream();
+
+                // Add the client thread to the map
                 threads.put(temp.getUsername(),temp);
                 threads.get(temp.getUsername()).start();
+
+                System.out.println(threads.toString());
             } catch (IOException e) {
 
                 if(isStopped()) {
@@ -72,7 +88,6 @@ public class Server implements Runnable {
 
                 throw new RuntimeException( "Error accepting client connection", e);
             }
-            // Create new clientThread on connection
         }
         System.out.println("Server Stopped.") ;
     }
@@ -119,5 +134,43 @@ public class Server implements Runnable {
         Server test = new Server(4444);
         test.run();
     }
+
+    /*
+     * Client server operations
+     */
+    public int getUserID(String username){
+        return db.getUserID(username);
+    }
+
+    public Setup setup(String username){
+
+        return new Setup(db.getUserID(username), username, db.getChats(username), history(db.getActiveChatID(username), 1));
+    }
+
+    public History history(int chatID, int appTarget){
+
+
+        return new History(db.getChatUserIDs(chatID), chatID, appTarget, db.getChatUsernames(chatID), db.getHistory(chatID, appTarget));
+    }
+
+    public void recievedMessage(Message m){
+
+        db.setMessage(m.getChatID(), m.getAppTarget(), m.getMessage(), m.getMeta());
+        messageQueue.add(m);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
 
