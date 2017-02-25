@@ -1,4 +1,4 @@
-package Server.Database;
+package Server.database;
 
 import Server.Database.Database;
 import Server.Server;

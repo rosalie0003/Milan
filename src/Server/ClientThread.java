@@ -1,8 +1,8 @@
 package Server;
 
-import Server.Communications.*;
-import Server.Database.Database;
-import Server.Database.MessengerDatabase;
+import Server.communications.*;
+import Server.database.Database;
+import Server.database.MessengerDatabase;
 
 import java.io.*;
 import java.net.Socket;
@@ -10,7 +10,7 @@ import java.net.Socket;
 /**
  * Created by mnt_x on 22/02/2017.
  */
-public class ClientThread extends Thread {
+public class ClientThread extends Thread implements PacketHandler {
 
     private Server server;
 
