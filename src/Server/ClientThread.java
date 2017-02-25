@@ -1,11 +1,12 @@
 package Server;
 
-import Server.communications.*;
-import Server.database.Database;
-import Server.database.MessengerDatabase;
-
 import java.io.*;
 import java.net.Socket;
+import java.util.LinkedList;
+import java.util.Queue;
+
+import Server.communications.*;
+import communications.*;
 
 /**
  * Created by mnt_x on 22/02/2017.
@@ -17,6 +18,7 @@ public class ClientThread extends Thread implements PacketHandler {
     private Socket clientSocket = null;
     private ObjectInputStream input;
     private ObjectOutputStream output;
+    Queue<Packet> tempPacketsToProcess = new LinkedList<Packet>();
     private int userID;
 
     /**
@@ -37,45 +39,98 @@ public class ClientThread extends Thread implements PacketHandler {
         }
     }
 
+
+    public synchronized void addPacketToProcess(Packet packet) {
+
+        tempPacketsToProcess.add(packet);
+    }
+
+    public synchronized Packet dequeuePacketToProcess() {
+
+        return tempPacketsToProcess.poll();
+    }
+
+
     /**
      *
      */
     public synchronized void run() {
-        System.out.println();
-        while(true) {
 
-            for (int i = 0; i <10; i++) {
-                System.out.print(i);
-            }
-            // each thread needs a queue
+        try {
 
-            // create database connection ---- consider connection pool when I have more time
+            Packet item;
+            while(true) {
 
-            try {
+                if((item = dequeuePacketToProcess()) != null) {
 
-                // pass input and output and db connection to connectionHandler to parse incoming objects
-                CommunicationHandler ch = new CommunicationHandler(input.readObject(), output);
-                synchronized (ch) {
-                    ch.parseCommunication();
-                    // if message is received notify other threads to query database for new message to send to client
-                    if (ch.isMessageReceived()) {
-
-                        // set false after doing stuff
-                        ch.setMessageReceived(false);
-                    }
-
+                    PacketReader.readPacket(item, this);
                 }
-
-
-                output.close();
-                input.close();
-            } catch (IOException e) {
-
-                e.printStackTrace();
-            } catch (ClassNotFoundException e) {
-
-                e.printStackTrace();
             }
         }
+        catch (Exception e) {
+
+            System.out.println("ClientController.run() interrupted.");
+        }
+    }
+
+
+
+    /*
+     * Handlers
+     */
+
+    @Override
+    public boolean handleMessage(Message message) {
+        return false;
+    }
+
+    @Override
+    public boolean handleHistory(History history) {
+        return false;
+    }
+
+    @Override
+    public boolean handleHistoryRequest(HistoryRequest historyRequest) {
+        return false;
+    }
+
+    @Override
+    public boolean handleServerMessage(ServerMessage serverMessage) {
+        return false;
+    }
+
+    @Override
+    public boolean handleSignUp(SignUp signUp) {
+        return false;
+    }
+
+    @Override
+    public boolean handleLogout(Logout logout) {
+        return false;
+    }
+
+    @Override
+    public boolean handleCreateGroup(CreateGroup createGroup) {
+        return false;
+    }
+
+    @Override
+    public boolean handleFriendRequest(FriendRequest friendRequest) {
+        return false;
+    }
+
+    @Override
+    public boolean handleAddFriend(AddFriend addFriend) {
+        return false;
+    }
+
+    @Override
+    public boolean handleSetup(Setup setup) {
+        return false;
+    }
+
+    @Override
+    public boolean handleLogin(Login login) {
+        return false;
     }
 }

@@ -1,16 +1,15 @@
 package Server;
 
-import Server.Database.*;
+import Server.database.*;
+import communications.Packet;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.Queue;
 
 /**
  * @author Laurie Dugdale
@@ -54,10 +53,9 @@ public class Server implements Runnable {
 
         while(! isStopped()){
 
-            Socket clientSocket = null;
             try {
 
-                clientSocket = this.serverSocket.accept();
+                Socket clientSocket = this.serverSocket.accept();
 
                 threads.put("123", new ClientThread(this, clientSocket));
                 threads.get("123").run();
