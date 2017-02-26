@@ -26,6 +26,11 @@ public interface Database {
     // get the users last active chat
     List<String> getActiveChat(String username);
 
+    void addUserToChat(int userID);
+
+    void removeUserFromChat(int userID);
+
+
     // get the ID of the users last active chat
     int getActiveChatID(String username);
 

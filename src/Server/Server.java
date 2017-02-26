@@ -18,53 +18,70 @@ public class Server implements Runnable {
 
     private int port;
     private ServerGUI sg;
-    private ServerSocket serverSocket = null;
-    private boolean isStopped = false;
-    private Thread runningThread= null;
-    private Map<Integer, ClientThread> threads;
-    private Queue<Message> messageQueue;
+    private ServerSocket serverSocket;
+    private boolean isStopped;
+    private Map<Integer, ClientThread> clientThreads;
     private MessageThread messageThread;
     private Database db;
 
+    /**
+     * Constructor for command line
+     *
+     * @param port
+     */
     public Server(int port) {
+
+        this.serverSocket = null;
 
         this.port = port;
 
+        this.isStopped = false;
+
         db = new MessengerDatabase();
 
-        threads = new HashMap<>();
-
-        Queue<Message> messageQueue = new LinkedList<>();
+        clientThreads = new HashMap<>();
 
         messageThread = new MessageThread(this);
     }
 
+    /**
+     * Constructor for GUI
+     *
+     * @param port
+     * @param sg
+     */
     public Server(int port, ServerGUI sg) {
+
+        this.serverSocket = null;
 
         this.port = port;
 
-        this.sg = sg;
+        this.isStopped = false;
 
         db = new MessengerDatabase();
 
-        threads = new HashMap<>();
-
-        Queue<Message> messageQueue = new LinkedList<>();
+        clientThreads = new HashMap<>();
 
         messageThread = new MessageThread(this);
+
+        this.sg = sg;
 
     }
 
     public void addThread(int key, ClientThread thread){
 
-        threads.put(key, thread);
+        clientThreads.put(key, thread);
     }
 
     public ClientThread getThread(int key){
 
-        return threads.get(key);
+        return clientThreads.get(key);
     }
 
+    private synchronized boolean isStopped() {
+
+        return this.isStopped;
+    }
 
     /**
      * Server pool creating new Client thread
@@ -72,7 +89,7 @@ public class Server implements Runnable {
     public void run(){
 
         synchronized(this){
-            this.runningThread = Thread.currentThread();
+            Thread runningThread = Thread.currentThread();
         }
         openServerSocket();
 
@@ -92,8 +109,6 @@ public class Server implements Runnable {
                 // Add the client thread to the map
                 addThread(client.getUserID(), client);
                 getThread(client.getUserID()).start();
-
-                System.out.println(threads.toString());
             } catch (IOException e) {
 
                 if(isStopped()) {
@@ -108,12 +123,6 @@ public class Server implements Runnable {
         System.out.println("Server Stopped.") ;
     }
 
-
-    private synchronized boolean isStopped() {
-
-        return this.isStopped;
-    }
-
     /**
      * Stop server - used by GUI
      */
@@ -123,6 +132,7 @@ public class Server implements Runnable {
         try {
 
             terminateThreads();
+            this.messageThread.interrupt();
             this.serverSocket.close();
         } catch (IOException e) {
 
@@ -152,7 +162,7 @@ public class Server implements Runnable {
     }
 
     /*
-     * server thread operations
+     * server to thread operations
      */
     public int getUserID(String username){
         return db.getUserID(username);
@@ -170,10 +180,14 @@ public class Server implements Runnable {
     }
 
     public void receivedMessage(Message m){
-        System.out.println("receivedMessage");
 
         db.setMessage(m.getChatID(), m.getAppTarget(), m.getMessage(), m.getMeta());
         messageThread.enqueueMessageQueue(m);
+    }
+
+    public boolean inThread(int id){
+
+        return this.clientThreads.containsKey(id);
     }
 
     public boolean isUserConnected(int id){

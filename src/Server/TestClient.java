@@ -14,8 +14,6 @@ public class TestClient {
 
     public static void main(String[] args) throws IOException {
 
-        long start = System.currentTimeMillis();
-
         Socket s = new Socket("localhost", 4444);
 
         Login l = new Login("username", "pass");
@@ -25,23 +23,27 @@ public class TestClient {
         Message m = new Message(userIDs, 1, 2, "username", "thisismeta", "Its working!!!");
 
         ObjectOutputStream toServer = new ObjectOutputStream(s.getOutputStream());
+
         toServer.writeObject(new Packet(l));
         //toServer.writeObject(new Packet(h));
         toServer.writeObject(new Packet(m));
 
+
         try (ObjectInputStream fromServer = new ObjectInputStream(s.getInputStream())) {
+            while(true) {
 
-            Packet p = (Packet)fromServer.readObject();
-            Setup setup = (Setup)p.getMemo();
-            System.out.println(setup.getUsername());
+                Packet p = (Packet) fromServer.readObject();
+                Setup setup = (Setup) p.getMemo();
+                System.out.println(setup.getUsername());
 
-            Packet pm = (Packet)fromServer.readObject();
-            Message message = (Message)pm.getMemo();
-            System.out.println(message.getMessage());
-
+                Packet pm = (Packet) fromServer.readObject();
+                Message message = (Message) pm.getMemo();
+                System.out.println(message.getMessage());
+            }
 
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
+
     }
 }

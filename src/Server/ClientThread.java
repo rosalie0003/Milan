@@ -14,10 +14,9 @@ public class ClientThread extends Thread implements PacketHandler {
 
     private Server server;
 
-    private Socket clientSocket = null;
     private ObjectInputStream input;
     private ObjectOutputStream output;
-    Queue<Packet> tempPacketsToProcess = new LinkedList<Packet>();
+    private Queue<Packet> tempPacketsToProcess = new LinkedList<Packet>();
     private int userID;
     public String username;
 
@@ -25,6 +24,7 @@ public class ClientThread extends Thread implements PacketHandler {
      * Constructor setup input output stream and assign socket to field variable.
      *
      * @param clientSocket
+     * @param server
      */
     public ClientThread(Server server, Socket clientSocket) {
 
@@ -32,7 +32,6 @@ public class ClientThread extends Thread implements PacketHandler {
 
         try {
 
-            this.clientSocket = clientSocket;
             input = new ObjectInputStream(clientSocket.getInputStream());
             output = new ObjectOutputStream(clientSocket.getOutputStream());
 
@@ -56,10 +55,12 @@ public class ClientThread extends Thread implements PacketHandler {
     }
 
     public void setUsername(String username){
+
         this.username = username;
     }
 
     public void setUserID(int userID){
+
         this.userID = userID;
     }
 
@@ -132,12 +133,10 @@ public class ClientThread extends Thread implements PacketHandler {
     /*
      * Handlers
      */
-
     @Override
     public boolean handleMessage(Message message) {
-        System.out.println("handleMessage");
-        server.receivedMessage(message);
 
+        server.receivedMessage(message);
         return true;
     }
 
@@ -151,7 +150,6 @@ public class ClientThread extends Thread implements PacketHandler {
     @Override
     public boolean handleHistoryRequest(HistoryRequest historyRequest) {
 
-        System.out.println("handleHistoryRequest");
         server.history(historyRequest.getChatID(), historyRequest.getAppTarget());
         return true;
     }

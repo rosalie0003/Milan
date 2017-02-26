@@ -49,6 +49,16 @@ public class MessengerDatabase implements Database {
     }
 
     @Override
+    public void addUserToChat(int userID) {
+
+    }
+
+    @Override
+    public void removeUserFromChat(int userID) {
+
+    }
+
+    @Override
     public int getActiveChatID(String username) {
         return 0;
     }
