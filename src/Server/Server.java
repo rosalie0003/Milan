@@ -21,8 +21,9 @@ public class Server implements Runnable {
     private ServerSocket serverSocket = null;
     private boolean isStopped = false;
     private Thread runningThread= null;
-    private Map<String, ClientThread> threads;
+    private Map<Integer, ClientThread> threads;
     private Queue<Message> messageQueue;
+    private MessageThread messageThread;
     private Database db;
 
     public Server(int port) {
@@ -34,6 +35,8 @@ public class Server implements Runnable {
         threads = new HashMap<>();
 
         Queue<Message> messageQueue = new LinkedList<>();
+
+        messageThread = new MessageThread(this);
     }
 
     public Server(int port, ServerGUI sg) {
@@ -47,6 +50,19 @@ public class Server implements Runnable {
         threads = new HashMap<>();
 
         Queue<Message> messageQueue = new LinkedList<>();
+
+        messageThread = new MessageThread(this);
+
+    }
+
+    public void addThread(int key, ClientThread thread){
+
+        threads.put(key, thread);
+    }
+
+    public ClientThread getThread(int key){
+
+        return threads.get(key);
     }
 
 
@@ -60,8 +76,8 @@ public class Server implements Runnable {
         }
         openServerSocket();
 
-        // Create Thread to handle all messages.
-        Thread MessagesThread = new Thread( new MessageThread(this));
+        // start messageThread to handle all messages.
+        messageThread.start();
 
         while(! isStopped()){
 
@@ -71,11 +87,11 @@ public class Server implements Runnable {
                 Socket clientSocket = this.serverSocket.accept();
 
                 // Create the client thread
-                ClientThread temp = new ClientThread(this, clientSocket);
+                ClientThread client = new ClientThread(this, clientSocket);
 
                 // Add the client thread to the map
-                threads.put(temp.getUsername(),temp);
-                threads.get(temp.getUsername()).start();
+                addThread(client.getUserID(), client);
+                getThread(client.getUserID()).start();
 
                 System.out.println(threads.toString());
             } catch (IOException e) {
@@ -136,7 +152,7 @@ public class Server implements Runnable {
     }
 
     /*
-     * Client server operations
+     * server thread operations
      */
     public int getUserID(String username){
         return db.getUserID(username);
@@ -153,12 +169,17 @@ public class Server implements Runnable {
         return new History(db.getChatUserIDs(chatID), chatID, appTarget, db.getChatUsernames(chatID), db.getHistory(chatID, appTarget));
     }
 
-    public void recievedMessage(Message m){
+    public void receivedMessage(Message m){
+        System.out.println("receivedMessage");
 
         db.setMessage(m.getChatID(), m.getAppTarget(), m.getMessage(), m.getMeta());
-        messageQueue.add(m);
+        messageThread.enqueueMessageQueue(m);
     }
 
+    public boolean isUserConnected(int id){
+
+        return db.userActive(id);
+    }
 
 
 

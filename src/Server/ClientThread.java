@@ -93,37 +93,38 @@ public class ClientThread extends Thread implements PacketHandler {
      */
     public synchronized void run() {
 
+        while(true) {
 
-        try {
-            addPacketToProcess((Packet)input.readObject());
+            try {
+                addPacketToProcess((Packet) input.readObject());
 
 
-        }catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        try {
-
-            Packet item;
-            while(true) {
-
-                if((item = dequeuePacketToProcess()) != null) {
-
-                    PacketReader.readPacket(item, this);
-                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
             }
-        }
-        catch (Exception e) {
 
-            System.out.println("ClientController.run() interrupted.");
+            try {
+
+                Packet item;
+                while (true) {
+
+                    if ((item = dequeuePacketToProcess()) != null) {
+
+                        PacketReader.readPacket(item, this);
+                    }
+                }
+            } catch (Exception e) {
+
+                System.out.println("ClientController.run() interrupted.");
+            }
         }
     }
 
-    public void messageFromClient(Message message) throws IOException {
+    public void messageToClient(Message message) throws IOException {
 
-        output.writeObject(message);
+        output.writeObject(new Packet(message));
     }
 
 
@@ -134,8 +135,8 @@ public class ClientThread extends Thread implements PacketHandler {
 
     @Override
     public boolean handleMessage(Message message) {
-
-        server.recievedMessage(message);
+        System.out.println("handleMessage");
+        server.receivedMessage(message);
 
         return true;
     }
@@ -150,7 +151,7 @@ public class ClientThread extends Thread implements PacketHandler {
     @Override
     public boolean handleHistoryRequest(HistoryRequest historyRequest) {
 
-
+        System.out.println("handleHistoryRequest");
         server.history(historyRequest.getChatID(), historyRequest.getAppTarget());
         return true;
     }
@@ -200,7 +201,8 @@ public class ClientThread extends Thread implements PacketHandler {
         String password = login.getPassword();
 
         try {
-            setUserID(server.getUserID(username));
+            //setUserID(server.getUserID(username));
+            setUserID(22);
             setUsername(username);
 
             output.writeObject(new Packet(server.setup(username)));
